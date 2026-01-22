@@ -7,8 +7,26 @@
 
 ## Web UI 認証
 
-- Web アプリは NextAuth でログインを提供する。
+- Web アプリは NextAuth で GitHub OAuth ログインを提供する。
 - ログイン済みユーザーだけが PAT を発行/管理できる。
+
+### GitHub OAuth の制限事項（セキュリティ方針）
+
+- GitHub OAuth は**認証のみ**に使用する
+- **リフレッシュトークンは取得・保存しない**
+- **GitHub API へのアクセスは一切行わない**
+- 認可（権限管理）はすべて git-nl 側で行う
+- 最小限のスコープ（`read:user`, `user:email`）のみ要求
+
+### GitHub OAuth アプリケーションの設定
+
+1. GitHub で OAuth App を作成: https://github.com/settings/developers
+2. 「New OAuth App」をクリック
+3. 以下を設定:
+   - Application name: `git-nl`
+   - Homepage URL: `https://your-domain.com`
+   - Authorization callback URL: `https://your-domain.com/api/auth/callback/github`
+4. Client ID と Client Secret を `.env` に設定
 
 ## PAT 発行（UI）
 
