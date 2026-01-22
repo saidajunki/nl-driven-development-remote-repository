@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
+import { initBareRepository, deleteRepositoryFiles } from '@/lib/git/git-service';
 
 /**
  * リポジトリサービス
@@ -36,6 +37,7 @@ export function isValidRepositoryName(name: string): boolean {
 
 /**
  * リポジトリを作成する
+ * DB にレコードを作成し、bare リポジトリを初期化する
  */
 export async function createRepository(
   input: CreateRepositoryInput
@@ -44,6 +46,17 @@ export async function createRepository(
     throw new Error('リポジトリ名が不正です');
   }
 
+  // まずオーナー情報を取得
+  const owner = await prisma.user.findUnique({
+    where: { id: input.ownerId },
+    select: { id: true, name: true },
+  });
+
+  if (!owner || !owner.name) {
+    throw new Error('オーナーが見つかりません');
+  }
+
+  // DB にレコード作成
   const repository = await prisma.repository.create({
     data: {
       name: input.name,
@@ -60,6 +73,15 @@ export async function createRepository(
       },
     },
   });
+
+  // bare リポジトリを初期化
+  try {
+    await initBareRepository(owner.name, input.name);
+  } catch (error) {
+    // 失敗した場合は DB レコードも削除
+    await prisma.repository.delete({ where: { id: repository.id } });
+    throw error;
+  }
 
   return repository;
 }
@@ -124,16 +146,45 @@ export async function getRepositoryByOwnerAndName(
 
 /**
  * リポジトリを削除する
+ * DB レコードと bare リポジトリの両方を削除
  */
 export async function deleteRepository(
   repoId: string,
   userId: string
 ): Promise<boolean> {
+  // まずリポジトリ情報を取得
+  const repo = await prisma.repository.findFirst({
+    where: {
+      id: repoId,
+      ownerId: userId,
+    },
+    include: {
+      owner: {
+        select: { name: true },
+      },
+    },
+  });
+
+  if (!repo || !repo.owner.name) {
+    return false;
+  }
+
+  // DB レコード削除
   const result = await prisma.repository.deleteMany({
     where: {
       id: repoId,
-      ownerId: userId, // 所有者のみ削除可能
+      ownerId: userId,
     },
   });
+
+  if (result.count > 0) {
+    // bare リポジトリも削除（エラーは無視）
+    try {
+      await deleteRepositoryFiles(repo.owner.name, repo.name);
+    } catch {
+      // ファイル削除失敗は無視
+    }
+  }
+
   return result.count > 0;
 }
