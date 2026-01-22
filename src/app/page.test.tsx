@@ -54,12 +54,12 @@ describe('トップページ', () => {
           owner: { id: 'user1', name: 'testuser' },
         },
       ];
-      render(<Dashboard repositories={repos} userName="testuser" />);
+      render(<Dashboard repositories={repos} userName="testuser" userImage={null} />);
       expect(screen.getByText('testuser/test-repo')).toBeInTheDocument();
     });
 
     it('リポジトリがない場合はメッセージが表示される', () => {
-      render(<Dashboard repositories={[]} userName="testuser" />);
+      render(<Dashboard repositories={[]} userName="testuser" userImage={null} />);
       expect(screen.getByText('リポジトリがありません')).toBeInTheDocument();
     });
   });

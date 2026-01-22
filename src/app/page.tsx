@@ -26,5 +26,5 @@ export default async function HomePage() {
     limit: 20,
   });
 
-  return <Dashboard repositories={repositories} userName={session.user.name} />;
+  return <Dashboard repositories={repositories} userName={session.user.name} userImage={session.user.image} />;
 }
