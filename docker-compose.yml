@@ -1,0 +1,37 @@
+services:
+  # Next.js アプリケーション
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - git-repos:/var/git/repos
+    depends_on:
+      - git
+    networks:
+      - app-network
+
+  # Git Smart HTTP サーバ
+  git:
+    build:
+      context: ./docker/git
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - git-repos:/var/git/repos
+    networks:
+      - app-network
+
+volumes:
+  git-repos:
+
+networks:
+  app-network:
+    driver: bridge

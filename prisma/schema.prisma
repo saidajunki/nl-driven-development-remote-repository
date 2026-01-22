@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザー
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // リレーション
+  accounts      Account[]
+  sessions      Session[]
+  pats          PersonalAccessToken[]
+  repositories  Repository[]
+
+  @@map("users")
+}
+
+// NextAuth 用アカウント（OAuth プロバイダ連携）
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// NextAuth 用セッション
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// NextAuth 用検証トークン
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Personal Access Token（Git push 認証用）
+model PersonalAccessToken {
+  id          String    @id @default(cuid())
+  name        String
+  tokenHash   String    @unique  // ハッシュ化されたトークン
+  userId      String
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("personal_access_tokens")
+}
+
+// リポジトリ
+model Repository {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // 解析結果
+  analytics RepositoryAnalytics?
+
+  @@unique([ownerId, name])
+  @@map("repositories")
+}
+
+// リポジトリ解析結果
+model RepositoryAnalytics {
+  id           String   @id @default(cuid())
+  repositoryId String   @unique
+  
+  // ルール割合（JSON）
+  rulesBreakdown Json?
+  
+  // カバレッジ
+  coverageLines     Float?
+  coverageBranches  Float?
+  coverageFunctions Float?
+  
+  // specs インデックス（JSON）
+  specsIndex Json?
+  
+  analyzedAt DateTime @default(now())
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@map("repository_analytics")
+}
