@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // 将来の拡張用
+  output: 'standalone',
 };
 
 export default nextConfig;

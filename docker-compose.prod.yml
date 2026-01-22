@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: git-nl-app:latest
+    container_name: git-nl
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.git-nl.rule=Host(`git-nl.app.babl.tech`)"
+      - "traefik.http.routers.git-nl.tls=true"
+      - "traefik.http.routers.git-nl.tls.certresolver=letsencrypt"
+      - "traefik.http.services.git-nl.loadbalancer.server.port=3000"
+
+networks:
+  apps-network:
+    external: true
