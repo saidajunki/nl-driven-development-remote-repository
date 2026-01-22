@@ -23,10 +23,10 @@ export function Header({ userName, userImage }: Props) {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-sm">NL</span>
+                <span className="text-white font-bold text-sm">git</span>
               </div>
               <span className="font-semibold text-gray-900 hidden sm:block">
-                NL-Driven
+                git-nl
               </span>
             </Link>
 

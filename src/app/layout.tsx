@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'NL-Driven Repository',
+  title: 'git-nl',
   description: '日本語仕様書・ルールを中心としたGitリモートリポジトリ',
 };
 

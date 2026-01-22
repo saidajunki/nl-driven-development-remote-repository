@@ -19,7 +19,7 @@ export function LandingPage() {
             transition={{ duration: 0.5 }}
             className="text-xl font-bold"
           >
-            NL-Driven
+            git-nl
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -132,7 +132,7 @@ export function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-4xl md:text-5xl font-bold text-center mb-20"
           >
-            なぜ NL-Driven？
+            なぜ git-nl？
           </motion.h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -217,7 +217,7 @@ export function LandingPage() {
       {/* フッター */}
       <footer className="py-8 px-6 border-t border-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-500">
-          <p>© 2025 NL-Driven Repository</p>
+          <p>© 2025 git-nl</p>
         </div>
       </footer>
     </div>

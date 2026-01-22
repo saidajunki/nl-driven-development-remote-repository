@@ -27,7 +27,7 @@ describe('トップページ', () => {
   describe('LandingPage（未ログイン時）', () => {
     it('サービス名が表示される', () => {
       render(<LandingPage />);
-      expect(screen.getByText('NL-Driven')).toBeInTheDocument();
+      expect(screen.getByText('git-nl')).toBeInTheDocument();
     });
 
     it('ログインリンクが表示される', () => {
@@ -37,7 +37,7 @@ describe('トップページ', () => {
 
     it('特徴セクションが表示される', () => {
       render(<LandingPage />);
-      expect(screen.getByText('なぜ NL-Driven？')).toBeInTheDocument();
+      expect(screen.getByText('なぜ git-nl？')).toBeInTheDocument();
     });
   });
 
