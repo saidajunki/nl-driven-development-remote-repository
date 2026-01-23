@@ -33,7 +33,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Create git repositories directory with proper permissions
-RUN mkdir -p /var/git && chown nextjs:nodejs /var/git
+RUN mkdir -p /var/git/repos && chown -R nextjs:nodejs /var/git
 
 # Copy built assets (public is optional)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -45,5 +45,6 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV GIT_REPOS_PATH="/var/git/repos"
 
 CMD ["node", "server.js"]
