@@ -25,9 +25,15 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Install git for repository operations
+RUN apk add --no-cache git
+
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Create git repositories directory with proper permissions
+RUN mkdir -p /var/git && chown nextjs:nodejs /var/git
 
 # Copy built assets (public is optional)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

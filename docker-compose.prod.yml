@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - git-data:/var/git
     networks:
       - apps-network
     labels:
@@ -16,6 +18,9 @@ services:
       - "traefik.http.routers.git-nl.tls=true"
       - "traefik.http.routers.git-nl.tls.certresolver=letsencrypt"
       - "traefik.http.services.git-nl.loadbalancer.server.port=3000"
+
+volumes:
+  git-data:
 
 networks:
   apps-network:
