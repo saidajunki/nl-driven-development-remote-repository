@@ -123,7 +123,7 @@ export default async function RepositoryPage({ params }: Props) {
                 <span className="text-sm font-medium text-gray-700">Clone</span>
                 <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-xl px-4 py-2">
                   <code className="text-sm text-gray-600 flex-1 truncate">
-                    https://example.com/{owner}/{repo}.git
+                    {process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/{owner}/{repo}.git
                   </code>
                   <button
                     className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
@@ -154,7 +154,7 @@ export default async function RepositoryPage({ params }: Props) {
                 <div className="bg-gray-50 rounded-xl p-4 text-left max-w-md mx-auto">
                   <p className="text-xs text-gray-500 mb-2">既存のリポジトリをプッシュ:</p>
                   <pre className="text-sm text-gray-700 overflow-x-auto">
-{`git remote add origin https://example.com/${owner}/${repo}.git
+{`git remote add origin ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/${owner}/${repo}.git
 git push -u origin main`}
                   </pre>
                 </div>

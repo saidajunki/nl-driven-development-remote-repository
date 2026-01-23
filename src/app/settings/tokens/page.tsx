@@ -55,7 +55,7 @@ export default async function TokensPage() {
             <p>Git push 時に PAT をパスワードとして使用します：</p>
             <pre className="bg-blue-100 rounded-xl p-3 overflow-x-auto text-xs">
 {`# クローン時に認証情報を含める
-git clone https://username:YOUR_TOKEN@git-nl.example.com/owner/repo.git
+git clone https://username:YOUR_TOKEN@your-domain.com/owner/repo.git
 
 # または credential helper を使用
 git config credential.helper store
