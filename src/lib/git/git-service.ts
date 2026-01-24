@@ -33,8 +33,8 @@ export async function initBareRepository(
   // ディレクトリ作成
   await mkdir(repoPath, { recursive: true });
 
-  // git init --bare
-  await execAsync(`git init --bare "${repoPath}"`);
+  // git init --bare (デフォルトブランチをmainに設定)
+  await execAsync(`git init --bare --initial-branch=main "${repoPath}"`);
 
   // git-http-backend 用の設定
   await execAsync(`git -C "${repoPath}" config http.receivepack true`);

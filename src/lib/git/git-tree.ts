@@ -30,7 +30,17 @@ export async function listTree(
   path = ''
 ): Promise<TreeEntry[]> {
   const repoPath = getRepoPath(ownerName, repoName);
-  const targetPath = path ? `${ref}:${path}` : ref;
+  
+  // HEADが無効な場合、デフォルトブランチを使用
+  let actualRef = ref;
+  if (ref === 'HEAD') {
+    const defaultBranch = await getDefaultBranch(ownerName, repoName);
+    if (defaultBranch) {
+      actualRef = defaultBranch;
+    }
+  }
+  
+  const targetPath = path ? `${actualRef}:${path}` : actualRef;
 
   try {
     const { stdout } = await execAsync(
@@ -98,6 +108,7 @@ export async function getFileContent(
 
 /**
  * デフォルトブランチを取得
+ * HEADが無効な場合は、最初に見つかったブランチを返す
  */
 export async function getDefaultBranch(
   ownerName: string,
@@ -106,11 +117,38 @@ export async function getDefaultBranch(
   const repoPath = getRepoPath(ownerName, repoName);
 
   try {
+    // まずHEADが指すブランチを取得
     const { stdout } = await execAsync(
       `git -C "${repoPath}" symbolic-ref --short HEAD`,
       { encoding: 'utf-8' }
     );
-    return stdout.trim() || null;
+    const headBranch = stdout.trim();
+    
+    // HEADが指すブランチが実際に存在するか確認
+    try {
+      await execAsync(
+        `git -C "${repoPath}" rev-parse --verify ${headBranch}`,
+        { encoding: 'utf-8' }
+      );
+      return headBranch;
+    } catch {
+      // HEADが指すブランチが存在しない場合、最初のブランチを探す
+    }
+  } catch {
+    // symbolic-refが失敗した場合
+  }
+
+  // フォールバック: 最初に見つかったブランチを返す
+  try {
+    const { stdout: branches } = await execAsync(
+      `git -C "${repoPath}" branch --list`,
+      { encoding: 'utf-8' }
+    );
+    const branchList = branches.trim().split('\n').map(b => b.replace(/^\*?\s*/, '').trim()).filter(Boolean);
+    // main, master を優先
+    if (branchList.includes('main')) return 'main';
+    if (branchList.includes('master')) return 'master';
+    return branchList[0] || null;
   } catch {
     return null;
   }
@@ -131,9 +169,18 @@ export async function getLatestCommit(
 } | null> {
   const repoPath = getRepoPath(ownerName, repoName);
 
+  // HEADが無効な場合、デフォルトブランチを使用
+  let actualRef = ref;
+  if (ref === 'HEAD') {
+    const defaultBranch = await getDefaultBranch(ownerName, repoName);
+    if (defaultBranch) {
+      actualRef = defaultBranch;
+    }
+  }
+
   try {
     const { stdout } = await execAsync(
-      `git -C "${repoPath}" log -1 --format="%H%n%s%n%an%n%aI" ${ref}`,
+      `git -C "${repoPath}" log -1 --format="%H%n%s%n%an%n%aI" ${actualRef}`,
       { encoding: 'utf-8' }
     );
     const [hash, message, author, dateStr] = stdout.trim().split('\n');
