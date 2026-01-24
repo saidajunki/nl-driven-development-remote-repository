@@ -22,6 +22,8 @@ model User {
   sessions      Session[]
   pats          PersonalAccessToken[]
   repositories  Repository[]
+  authoredPRs   PullRequest[] @relation("PullRequestAuthor")
+  mergedPRs     PullRequest[] @relation("PullRequestMerger")
 
   @@map("users")
 }
@@ -98,9 +100,42 @@ model Repository {
 
   // 解析結果
   analytics RepositoryAnalytics?
+  
+  // Pull Requests
+  pullRequests PullRequest[]
 
   @@unique([ownerId, name])
   @@map("repositories")
+}
+
+// Pull Request
+model PullRequest {
+  id            String          @id @default(cuid())
+  repositoryId  String
+  number        Int             // リポジトリ内で一意の番号
+  title         String
+  description   String?
+  sourceBranch  String
+  targetBranch  String
+  status        PullRequestStatus @default(OPEN)
+  authorId      String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  mergedAt      DateTime?
+  mergedById    String?
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  author     User       @relation("PullRequestAuthor", fields: [authorId], references: [id])
+  mergedBy   User?      @relation("PullRequestMerger", fields: [mergedById], references: [id])
+
+  @@unique([repositoryId, number])
+  @@map("pull_requests")
+}
+
+enum PullRequestStatus {
+  OPEN
+  MERGED
+  CLOSED
 }
 
 // リポジトリ解析結果
